@@ -14,17 +14,22 @@ extern void NSLogv(CFStringRef format, va_list args);
 
 #else
 
-typedef void (*CFLogFunc)(int32_t lev, const char *message, size_t length, char withBanner);
+typedef void (*CFLogFunc)(int32_t lev,
+                          const char *message,
+                          size_t length,
+                          char withBanner);
 
-CF_EXPORT void
-_CFLogvEx2(CFLogFunc logit,
-           CFStringRef (*copyDescFunc)(void *, const void *),
-           CFStringRef (*contextDescFunc)(void *, const void *, const void *, bool, bool *),
-           CFDictionaryRef formatOptions, int32_t lev, CFStringRef format, va_list args);
+CF_EXPORT void _CFLogvEx2(CFLogFunc logit,
+                          CFStringRef (*copyDescFunc)(void *, const void *),
+                          CFStringRef (*contextDescFunc)(
+                              void *, const void *, const void *, bool, bool *),
+                          CFDictionaryRef formatOptions,
+                          int32_t lev,
+                          CFStringRef format,
+                          va_list args);
 #endif
 
-void _MOMDebugLog(CFStringRef format, ...)
-{
+void _MOMDebugLog(CFStringRef format, ...) {
     va_list args;
     va_start(args, format);
 #ifdef __APPLE__

@@ -17,50 +17,50 @@
 import Foundation
 
 public struct RotaryEncoder {
-    private static let Steps = MOM.dBTotalGain * MOM.dBIncrements
+  private static let Steps = MOM.dBTotalGain * MOM.dBIncrements
 
-    public private(set) var rotationCount: UInt16 = 0
+  public private(set) var rotationCount: UInt16 = 0
 
-    public init() {}
+  public init() {}
 
-    private static func unscale(_ value: Float) -> Int {
-        precondition(value >= 0.0)
-        precondition(value <= 1.0)
+  private static func unscale(_ value: Float) -> Int {
+    precondition(value >= 0.0)
+    precondition(value <= 1.0)
 
-        return lroundf(value.squareRoot() * Float(RotaryEncoder.Steps))
+    return lroundf(value.squareRoot() * Float(RotaryEncoder.Steps))
+  }
+
+  private static func unscaleDB(_ dBValue: Decibel) -> Int {
+    precondition(dBValue >= MOM.dBDadDisplayFloor)
+    precondition(dBValue <= MOM.dBDadDisplayCeiling)
+
+    let absoluteDBValue: Decibel = dBValue - MOM.dBDadDisplayFloor
+    return Int(absoluteDBValue * MOM.dBIncrements)
+  }
+
+  public mutating func rotate(by steps: Int) {
+    if steps > 0 {
+      rotationCount = rotationCount &+ UInt16(steps.magnitude)
+    } else {
+      rotationCount = rotationCount &- UInt16(steps.magnitude)
     }
+  }
 
-    private static func unscaleDB(_ dBValue: Decibel) -> Int {
-        precondition(dBValue >= MOM.dBDadDisplayFloor)
-        precondition(dBValue <= MOM.dBDadDisplayCeiling)
+  private mutating func rotate(to newValue: Int, from oldValue: Int) {
+    rotate(by: newValue - oldValue)
+  }
 
-        let absoluteDBValue: Decibel = dBValue - MOM.dBDadDisplayFloor
-        return Int(absoluteDBValue * MOM.dBIncrements)
-    }
+  public mutating func rotateScaled(to newValue: Float, from oldValue: Float) {
+    let oldValueUnscaled = RotaryEncoder.unscale(oldValue)
+    let newValueUnscaled = RotaryEncoder.unscale(newValue)
 
-    public mutating func rotate(by steps: Int) {
-        if steps > 0 {
-            rotationCount = rotationCount &+ UInt16(steps.magnitude)
-        } else {
-            rotationCount = rotationCount &- UInt16(steps.magnitude)
-        }
-    }
+    rotate(to: newValueUnscaled, from: oldValueUnscaled)
+  }
 
-    private mutating func rotate(to newValue: Int, from oldValue: Int) {
-        rotate(by: newValue - oldValue)
-    }
+  public mutating func rotateScaledDB(to newValue: Decibel, from oldValue: Decibel) {
+    let oldValueUnscaled = RotaryEncoder.unscaleDB(oldValue)
+    let newValueUnscaled = RotaryEncoder.unscaleDB(newValue)
 
-    public mutating func rotateScaled(to newValue: Float, from oldValue: Float) {
-        let oldValueUnscaled = RotaryEncoder.unscale(oldValue)
-        let newValueUnscaled = RotaryEncoder.unscale(newValue)
-
-        rotate(to: newValueUnscaled, from: oldValueUnscaled)
-    }
-
-    public mutating func rotateScaledDB(to newValue: Decibel, from oldValue: Decibel) {
-        let oldValueUnscaled = RotaryEncoder.unscaleDB(oldValue)
-        let newValueUnscaled = RotaryEncoder.unscaleDB(newValue)
-
-        rotate(to: newValueUnscaled, from: oldValueUnscaled)
-    }
+    rotate(to: newValueUnscaled, from: oldValueUnscaled)
+  }
 }

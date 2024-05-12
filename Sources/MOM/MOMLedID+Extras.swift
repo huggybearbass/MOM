@@ -18,47 +18,47 @@ import Foundation
 import Surrogate
 
 public extension MOMLedID {
-    static func allCases() -> AnySequence<MOMLedID> {
-        AnySequence {
-            MOMLedIDGenerator(max: MOMLedID.layer)
-        }
+  static func allCases() -> AnySequence<MOMLedID> {
+    AnySequence {
+      MOMLedIDGenerator(max: MOMLedID.layer)
+    }
+  }
+
+  private struct MOMLedIDGenerator: IteratorProtocol {
+    var currentKeyID = MOMLedID.output1.rawValue // 1
+    var maximumLedID: Int
+
+    init(max: MOMLedID) {
+      maximumLedID = max.rawValue
     }
 
-    private struct MOMLedIDGenerator: IteratorProtocol {
-        var currentKeyID = MOMLedID.output1.rawValue // 1
-        var maximumLedID: Int
+    mutating func next() -> MOMLedID? {
+      if currentKeyID > maximumLedID {
+        return nil
+      }
 
-        init(max: MOMLedID) {
-            maximumLedID = max.rawValue
-        }
+      let item = MOMLedID(rawValue: currentKeyID)
 
-        mutating func next() -> MOMLedID? {
-            if currentKeyID > maximumLedID {
-                return nil
-            }
+      currentKeyID += 1
 
-            let item = MOMLedID(rawValue: currentKeyID)
-
-            currentKeyID += 1
-
-            return item
-        }
+      return item
     }
+  }
 
-    init?(keyID: MOMKeyID) {
-        guard keyID != .external else {
-            return nil
-        }
-        self.init(rawValue: keyID.rawValue)
+  init?(keyID: MOMKeyID) {
+    guard keyID != .external else {
+      return nil
     }
+    self.init(rawValue: keyID.rawValue)
+  }
 
-    var keyID: MOMKeyID {
-        MOMKeyID(rawValue: rawValue)!
-    }
+  var keyID: MOMKeyID {
+    MOMKeyID(rawValue: rawValue)!
+  }
 }
 
 extension MOMLedID: CustomStringConvertible {
-    public var description: String {
-        keyID.description
-    }
+  public var description: String {
+    keyID.description
+  }
 }

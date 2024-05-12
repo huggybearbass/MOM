@@ -39,7 +39,7 @@ typedef CF_ENUM(uint16_t, MOMPortNumber) {
     kMOMDiscoveryReplyPort = 10004
 };
 
-#define kMOMDefaultAliveTime       20
+#define kMOMDefaultAliveTime 20
 
 struct _MOMPeerContext;
 
@@ -47,7 +47,7 @@ struct _MOMController {
     atomic_intptr_t retainCount;
     _Nullable CFMutableDictionaryRef options;
     MOMStatus (^_Nullable handler)(_Nonnull MOMControllerRef controller,
-                                   struct _MOMPeerContext * _Nonnull,
+                                   struct _MOMPeerContext *_Nonnull,
                                    MOMEvent event,
                                    _Nonnull CFMutableArrayRef params,
                                    _Nullable MOMSendReplyCallback sendReply);
@@ -56,7 +56,7 @@ struct _MOMController {
     _Nullable CFSocketRef udpSocket;
     _Nullable CFRunLoopTimerRef peerExpiryTimer;
     _Nullable CFMutableArrayRef peers;
-    struct _MOMPeerContext * _Nullable peerMaster;
+    struct _MOMPeerContext *_Nullable peerMaster;
     int32_t aliveTime;
 };
 
@@ -94,18 +94,16 @@ _Nullable CFSocketRef
 _MOMCreateDiscoverySocket(_Nonnull MOMControllerRef controller);
 
 /* SurrogateHandlers.c */
-MOMStatus
-_MOMProcessEvent(_Nonnull MOMControllerRef controller,
-                 MOMPeerContext *_Nonnull peerContext,
-                 MOMEvent event,
-                 _Nonnull CFArrayRef eventParams);
-
-/* SurrogateMessage.c */
-_Nullable CFDataRef
-_MOMCreateMessageFromEvent(MOMEvent event,
+MOMStatus _MOMProcessEvent(_Nonnull MOMControllerRef controller,
+                           MOMPeerContext *_Nonnull peerContext,
+                           MOMEvent event,
                            _Nonnull CFArrayRef eventParams);
 
-_Nullable  CFDataRef
+/* SurrogateMessage.c */
+_Nullable CFDataRef _MOMCreateMessageFromEvent(MOMEvent event,
+                                               _Nonnull CFArrayRef eventParams);
+
+_Nullable CFDataRef
 _MOMCreateDeviceReplyMessage(MOMEvent requestEvent,
                              _Nonnull CFArrayRef replyParams);
 
@@ -122,69 +120,56 @@ _MOMParseMessageString(_Nonnull CFStringRef messageBuf,
                        _Nonnull CFDataRef *_Nullable pErrorReply);
 
 /* SurrogatePeerContext.c */
-void
-_MOMControllerEnqueueMessage(_Nonnull MOMControllerRef controller,
-                             MOMPeerContext *_Nonnull peerContext,
-                             _Nonnull CFDataRef messageBuf);
+void _MOMControllerEnqueueMessage(_Nonnull MOMControllerRef controller,
+                                  MOMPeerContext *_Nonnull peerContext,
+                                  _Nonnull CFDataRef messageBuf);
 
-_Nullable CFMutableArrayRef
-_MOMCreatePeerContextArray(CFIndex capacity);
+_Nullable CFMutableArrayRef _MOMCreatePeerContextArray(CFIndex capacity);
 
-MOMPortStatus
-_MOMGetPeerPortStatus(_Nonnull MOMControllerRef controller,
+MOMPortStatus _MOMGetPeerPortStatus(_Nonnull MOMControllerRef controller,
+                                    MOMPeerContext *_Nonnull peerContext);
+
+void _MOMSetPeerPortStatus(_Nonnull MOMControllerRef controller,
+                           MOMPeerContext *_Nonnull peerContext,
+                           MOMPortStatus status,
+                           _Nullable CFErrorRef err);
+
+bool _MOMPeerIsMaster(_Nonnull MOMControllerRef controller,
                       MOMPeerContext *_Nonnull peerContext);
 
-void
-_MOMSetPeerPortStatus(_Nonnull MOMControllerRef controller,
-                      MOMPeerContext *_Nonnull peerContext,
-                      MOMPortStatus status,
-                      _Nullable CFErrorRef err);
+void _MOMSetMasterPeer(_Nonnull MOMControllerRef controller,
+                       MOMPeerContext *_Nullable peerContext);
 
-bool
-_MOMPeerIsMaster(_Nonnull MOMControllerRef controller,
-                 MOMPeerContext *_Nonnull peerContext);
+bool _MOMSetAliveTime(_Nonnull MOMControllerRef controller, int32_t aliveTime);
 
-void
-_MOMSetMasterPeer(_Nonnull MOMControllerRef controller,
-                  MOMPeerContext *_Nullable peerContext);
+void _MOMPeerContextRetain(MOMPeerContext *_Nonnull peerContext);
 
-bool
-_MOMSetAliveTime(_Nonnull MOMControllerRef controller,
-                 int32_t aliveTime);
+void _MOMPeerContextRelease(MOMPeerContext *_Nonnull peerContext);
 
-void
-_MOMPeerContextRetain(MOMPeerContext *_Nonnull peerContext);
+bool _MOMHandleConnectionFromNewAddress(_Nonnull MOMControllerRef controller,
+                                        _Nonnull CFDataRef address,
+                                        _Nonnull CFStringRef peerName,
+                                        _Nonnull CFReadStreamRef readStream,
+                                        _Nonnull CFWriteStreamRef writeStream);
 
-void
-_MOMPeerContextRelease(MOMPeerContext *_Nonnull peerContext);
+MOMStatus _MOMControllerSendToPeers(_Nonnull MOMControllerRef controller);
 
-bool
-_MOMHandleConnectionFromNewAddress(_Nonnull MOMControllerRef controller,
-                                   _Nonnull CFDataRef address,
-                                   _Nonnull CFStringRef peerName,
-                                   _Nonnull CFReadStreamRef readStream,
-                                   _Nonnull CFWriteStreamRef writeStream);
-
-MOMStatus
-_MOMControllerSendToPeers(_Nonnull MOMControllerRef controller);
-
-void
-_MOMInvalidatePeers(_Nonnull MOMControllerRef controller);
+void _MOMInvalidatePeers(_Nonnull MOMControllerRef controller);
 
 /* SurrogateLogging.c */
-void
-_MOMDebugLog(_Nonnull CFStringRef format, ...);
+void _MOMDebugLog(_Nonnull CFStringRef format, ...);
 
 /* SurrogateResolver.c */
 
 // no need to retain controller, but retain anything else withResolvedHost needs
-void
-_MOMResolveHostRestrictionAndPerform(_Nonnull MOMControllerRef controller,
-                                     void (^_Nonnull withResolvedHost)(_Nonnull MOMControllerRef controller,
-                                                                       _Nullable CFArrayRef restrictAddressList));
+void _MOMResolveHostRestrictionAndPerform(
+    _Nonnull MOMControllerRef controller,
+    void (^_Nonnull withResolvedHost)(
+        _Nonnull MOMControllerRef controller,
+        _Nullable CFArrayRef restrictAddressList));
 
-const struct sockaddr_in * _Nullable
-_MOMGetLocalInterfaceAddress(_Nonnull MOMControllerRef controller);
+const struct sockaddr_in *_Nullable _MOMGetLocalInterfaceAddress(
+    _Nonnull MOMControllerRef controller);
 
 //! Project version number for Surrogate.
 extern double SurrogateVersionNumber;

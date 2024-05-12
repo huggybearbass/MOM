@@ -98,62 +98,52 @@ typedef CF_ENUM(CFIndex, MOMEvent) {
     kMOMEventGetKeyState,
     kMOMEventSetKeyState,
     kMOMEventGetLedState,
-    kMOMEventSetLedState, 
+    kMOMEventSetLedState,
     kMOMEventGetLedIntensity,
     kMOMEventSetLedIntensity,
     kMOMEventGetRotationCount,
     kMOMEventSetRotationCount,
     kMOMEventGetRingLedState,
     kMOMEventSetRingLedState,
-    kMOMEventMax                    = kMOMEventSetRingLedState,
+    kMOMEventMax = kMOMEventSetRingLedState,
 
-    kMOMEventTypeHostGetRequest     = 0x01000000, // ? -- request from DADman (get)
-    kMOMEventTypeHostSetRequest     = 0x02000000, // & -- request from DADman (set)
-    kMOMEventTypeHostNotification   = 0x04000000, // % -- async notification from DADman
-    kMOMEventTypeHostAny            = 0x0F000000,
+    kMOMEventTypeHostGetRequest = 0x01000000, // ? -- request from DADman (get)
+    kMOMEventTypeHostSetRequest = 0x02000000, // & -- request from DADman (set)
+    kMOMEventTypeHostNotification =
+        0x04000000, // % -- async notification from DADman
+    kMOMEventTypeHostAny = 0x0F000000,
 
-    kMOMEventTypeDeviceReply        = 0x10000000, // : -- reply from MOM
-    kMOMEventTypeDeviceNotification = 0x20000000, // ! -- async notification from MOM
-    kMOMEventTypeDeviceAny          = 0xF0000000,
+    kMOMEventTypeDeviceReply = 0x10000000, // : -- reply from MOM
+    kMOMEventTypeDeviceNotification =
+        0x20000000, // ! -- async notification from MOM
+    kMOMEventTypeDeviceAny = 0xF0000000,
 
-    kMOMEventTypeMask               = (kMOMEventTypeHostAny | kMOMEventTypeDeviceAny),
-    kMOMEventMask                   = ~(kMOMEventTypeMask)
+    kMOMEventTypeMask = (kMOMEventTypeHostAny | kMOMEventTypeDeviceAny),
+    kMOMEventMask = ~(kMOMEventTypeMask)
 };
 
-static inline MOMEvent
-MOMEventGetType(MOMEvent event)
-{
+static inline MOMEvent MOMEventGetType(MOMEvent event) {
     return event & kMOMEventTypeMask;
 }
 
-static inline MOMEvent
-MOMEventGetEvent(MOMEvent event)
-{
+static inline MOMEvent MOMEventGetEvent(MOMEvent event) {
     return event & kMOMEventMask;
 }
 
-static inline bool
-MOMEventIsHostRequest(MOMEvent event)
-{
+static inline bool MOMEventIsHostRequest(MOMEvent event) {
     return MOMEventGetType(event) == kMOMEventTypeHostGetRequest ||
            MOMEventGetType(event) == kMOMEventTypeHostSetRequest;
 }
 
-static inline bool
-MOMEventIsDeviceReply(MOMEvent event)
-{
+static inline bool MOMEventIsDeviceReply(MOMEvent event) {
     return MOMEventGetType(event) == kMOMEventTypeDeviceReply;
 }
 
-static inline bool
-MOMEventIsHostNotification(MOMEvent event)
-{
+static inline bool MOMEventIsHostNotification(MOMEvent event) {
     return MOMEventGetType(event) == kMOMEventTypeHostNotification;
 }
 
-static inline bool
-MOMEventIsDeviceNotification(MOMEvent event)
-{
+static inline bool MOMEventIsDeviceNotification(MOMEvent event) {
     return MOMEventGetType(event) == kMOMEventTypeDeviceNotification;
 }
 
@@ -167,56 +157,54 @@ extern _Nonnull const CFStringRef kMOMCPUFirmwareVersion;
 extern _Nonnull const CFStringRef kMOMRecoveryFirmwareTag;
 extern _Nonnull const CFStringRef kMOMRecoveryFirmwareVersion;
 extern _Nonnull const CFStringRef kMOMRestrictToSpecifiedHost;
-extern _Nonnull const CFStringRef kMOMLocalInterfaceAddress; // contains struct sockaddr as CFDataRef
+extern _Nonnull const CFStringRef
+    kMOMLocalInterfaceAddress; // contains struct sockaddr as CFDataRef
 
 struct _MOMPeerContext;
 
-typedef MOMStatus
-(*MOMSendReplyCallback)(_Nonnull MOMControllerRef,
-                        struct _MOMPeerContext * _Nonnull, /* handle/cookie */
-                        MOMEvent,
-                        MOMStatus,
-                        _Nonnull CFArrayRef);
+typedef MOMStatus (*MOMSendReplyCallback)(
+    _Nonnull MOMControllerRef,
+    struct _MOMPeerContext *_Nonnull, /* handle/cookie */
+    MOMEvent,
+    MOMStatus,
+    _Nonnull CFArrayRef);
 
-_Nullable
-MOMControllerRef MOMControllerCreate(_Nullable CFAllocatorRef allocator,
-                                     _Nullable CFDictionaryRef options,
-                                     _Nullable CFRunLoopRef runloop,
-                                     MOMStatus (^_Nonnull handler)(_Nonnull MOMControllerRef,
-                                                                   struct _MOMPeerContext * _Nonnull,
-                                                                   MOMEvent,
-                                                                   _Nonnull CFArrayRef,
-                                                                   _Nullable MOMSendReplyCallback));
+_Nullable MOMControllerRef MOMControllerCreate(
+    _Nullable CFAllocatorRef allocator,
+    _Nullable CFDictionaryRef options,
+    _Nullable CFRunLoopRef runloop,
+    MOMStatus (^_Nonnull handler)(_Nonnull MOMControllerRef,
+                                  struct _MOMPeerContext *_Nonnull,
+                                  MOMEvent,
+                                  _Nonnull CFArrayRef,
+                                  _Nullable MOMSendReplyCallback));
 
-_Nonnull CFMutableDictionaryRef
-MOMControllerGetOptions(_Nonnull MOMControllerRef controller) CF_RETURNS_NOT_RETAINED;
+_Nonnull CFMutableDictionaryRef MOMControllerGetOptions(
+    _Nonnull MOMControllerRef controller) CF_RETURNS_NOT_RETAINED;
 
-MOMStatus
-MOMControllerNotify(_Nonnull MOMControllerRef controller,
-                    MOMEvent event,
-                    _Nullable CFArrayRef eventParams);
+MOMStatus MOMControllerNotify(_Nonnull MOMControllerRef controller,
+                              MOMEvent event,
+                              _Nullable CFArrayRef eventParams);
 
-MOMStatus
-MOMControllerNotifyDeferred(_Nonnull MOMControllerRef controller,
-                            MOMEvent event,
-                            _Nullable CFArrayRef eventParams);
+MOMStatus MOMControllerNotifyDeferred(_Nonnull MOMControllerRef controller,
+                                      MOMEvent event,
+                                      _Nullable CFArrayRef eventParams);
 
-MOMStatus
-MOMControllerSendDeferred(_Nonnull MOMControllerRef controller);
+MOMStatus MOMControllerSendDeferred(_Nonnull MOMControllerRef controller);
 
 void MOMControllerRelease(_Nonnull MOMControllerRef controller);
-_Nonnull MOMControllerRef MOMControllerRetain(_Nonnull MOMControllerRef controller);
+_Nonnull MOMControllerRef
+MOMControllerRetain(_Nonnull MOMControllerRef controller);
 
 MOMStatus
 MOMControllerBeginDiscoverability(_Nonnull MOMControllerRef controller);
 
-MOMStatus
-MOMControllerEndDiscoverability(_Nonnull MOMControllerRef controller);
+MOMStatus MOMControllerEndDiscoverability(_Nonnull MOMControllerRef controller);
 
 MOMStatus
 MOMControllerAnnounceDiscoverability(_Nonnull MOMControllerRef controller);
 
-MOMStatus
-MOMEnumerateInterfaces(MOMStatus (^_Nonnull block)(const struct ifaddrs * _Nonnull));
+MOMStatus MOMEnumerateInterfaces(
+    MOMStatus (^_Nonnull block)(const struct ifaddrs *_Nonnull));
 
 #endif /* Surrogate_h */

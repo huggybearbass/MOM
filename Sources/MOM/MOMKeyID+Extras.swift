@@ -18,70 +18,70 @@ import Foundation
 import Surrogate
 
 public extension MOMKeyID {
-    static func allLabelableCases() -> AnySequence<MOMKeyID> {
-        AnySequence {
-            MOMKeyIDGenerator(max: MOMKeyID.sourceC)
-        }
+  static func allLabelableCases() -> AnySequence<MOMKeyID> {
+    AnySequence {
+      MOMKeyIDGenerator(max: MOMKeyID.sourceC)
+    }
+  }
+
+  static func allCases() -> AnySequence<MOMKeyID> {
+    AnySequence {
+      MOMKeyIDGenerator(max: MOMKeyID.layer)
+    }
+  }
+
+  private struct MOMKeyIDGenerator: IteratorProtocol {
+    var currentKeyID = MOMKeyID.output1.rawValue // 1
+    var maximumKeyID: Int
+
+    init(max: MOMKeyID) {
+      maximumKeyID = max.rawValue
     }
 
-    static func allCases() -> AnySequence<MOMKeyID> {
-        AnySequence {
-            MOMKeyIDGenerator(max: MOMKeyID.layer)
-        }
+    mutating func next() -> MOMKeyID? {
+      if currentKeyID > maximumKeyID {
+        return nil
+      }
+
+      let item = MOMKeyID(rawValue: currentKeyID)
+
+      currentKeyID += 1
+
+      return item
     }
+  }
 
-    private struct MOMKeyIDGenerator: IteratorProtocol {
-        var currentKeyID = MOMKeyID.output1.rawValue // 1
-        var maximumKeyID: Int
-
-        init(max: MOMKeyID) {
-            maximumKeyID = max.rawValue
-        }
-
-        mutating func next() -> MOMKeyID? {
-            if currentKeyID > maximumKeyID {
-                return nil
-            }
-
-            let item = MOMKeyID(rawValue: currentKeyID)
-
-            currentKeyID += 1
-
-            return item
-        }
+  var labelSuffix: String {
+    switch self {
+    case .output1: return "Output1"
+    case .output2: return "Output2"
+    case .output3: return "Output3"
+    case .sourceA: return "SourceA"
+    case .sourceB: return "SourceB"
+    case .sourceC: return "SourceC"
+    case .ref: return "Ref"
+    case .dim: return "Dim"
+    case .talk: return "Talkback"
+    case .cut: return "Cut"
+    case .layer: return "Layer"
+    case .external: return "External"
     }
+  }
 
-    var labelSuffix: String {
-        switch self {
-        case .output1: return "Output1"
-        case .output2: return "Output2"
-        case .output3: return "Output3"
-        case .sourceA: return "SourceA"
-        case .sourceB: return "SourceB"
-        case .sourceC: return "SourceC"
-        case .ref: return "Ref"
-        case .dim: return "Dim"
-        case .talk: return "Talkback"
-        case .cut: return "Cut"
-        case .layer: return "Layer"
-        case .external: return "External"
-        }
-    }
+  init(ledID: MOMLedID) {
+    self.init(rawValue: ledID.rawValue)!
+  }
 
-    init(ledID: MOMLedID) {
-        self.init(rawValue: ledID.rawValue)!
-    }
-
-    var ledID: MOMLedID? {
-        guard self != .external else { return nil }
-        return MOMLedID(rawValue: rawValue)
-    }
+  var ledID: MOMLedID? {
+    guard self != .external else { return nil }
+    return MOMLedID(rawValue: rawValue)
+  }
 }
 
 extension MOMKeyID: CustomStringConvertible {
-    public var description: String {
-        labelSuffix
-    }
+  public var description: String {
+    labelSuffix
+  }
 }
 
 extension MOMKeyID: Codable {}
